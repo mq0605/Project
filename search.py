@@ -17,6 +17,7 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
+from re import U
 import util
 
 class SearchProblem:
@@ -87,79 +88,73 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    startingNode = problem.getStartState()
-    if problem.isGoalState(startingNode):
-        return []
+    start = problem.getStartState()
+    stack = util.Stack()
+    visited = []
+    cost = 0
+    action = []
+    stack.push((start, action, cost))
 
-    myQueue = util.Stack()
-    visitedNodes = []
-    # (node,actions)
-    myQueue.push((startingNode, []))
-
-    while not myQueue.isEmpty():
-        currentNode, actions = myQueue.pop()
-        if currentNode not in visitedNodes:
-            visitedNodes.append(currentNode)
-
-            if problem.isGoalState(currentNode):
-                return actions
-
-            for nextNode, action, cost in problem.getSuccessors(currentNode):
-                newAction = actions + [action]
-                myQueue.push((nextNode, newAction))
-
+    while not stack.isEmpty():
+        current = stack.pop()
+        if problem.isGoalState(current[0]):
+                return current[1]
+        if current[0] not in visited:
+            visited.append(current[0])
+        
+            for nextNode, act, co in problem.getSuccessors(current[0]):
+                newaction = current[1] + [act]
+                newcost = current[2] + co
+                stack.push((nextNode, newaction, newcost))
+    util.raiseNotDefined()
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    startingNode = problem.getStartState()
-    if problem.isGoalState(startingNode):
-        return []
-        
-    myQueue = util.Queue()
-    visitedNodes = []
-    # (node,actions)
-    myQueue.push((startingNode, []))
+    start = problem.getStartState()
+    queue = util.Queue()
+    visited = []
+    cost = 0
+    action = []
+    
+    queue.push((start, action, cost))
 
-    while not myQueue.isEmpty():
-        currentNode, actions = myQueue.pop()
-        if currentNode not in visitedNodes:
-            visitedNodes.append(currentNode)
+    while not queue.isEmpty():
+        current =  queue.pop()
+        if problem.isGoalState(current[0]):
+            return current[1]
+        if current[0] not in visited:
+            visited.append(current[0])
 
-            if problem.isGoalState(currentNode):
-                return actions
-
-            for nextNode, action, cost in problem.getSuccessors(currentNode):
-                newAction = actions + [action]
-                myQueue.push((nextNode, newAction))
-     
+            for nextNode, act, co in problem.getSuccessors(current[0]):
+                newAction = current[1] + [act]
+                newCost = current[2] + co
+                queue.push((nextNode, newAction,newCost))
+    util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    startingNode = problem.getStartState()
-    if problem.isGoalState(startingNode):
-        return []
-
-    visitedNodes = []
-
+    start = problem.getStartState()   
+    visited = []
+    cost = 0
+    action = []
     pQueue = util.PriorityQueue()
-    #((coordinate/node , action to current node , cost to current node),priority)
-    pQueue.push((startingNode, [], 0), 0)
+        
+    pQueue.push((start, action, cost), cost)
 
     while not pQueue.isEmpty():
 
-        currentNode, actions, prevCost = pQueue.pop()
-        if currentNode not in visitedNodes:
-            visitedNodes.append(currentNode)
+        current = pQueue.pop()
+        if problem.isGoalState(current[0]):
+            return current[1]
+        if current[0] not in visited:
+            visited.append(current[0])
 
-            if problem.isGoalState(currentNode):
-                return actions
-
-            for nextNode, action, cost in problem.getSuccessors(currentNode):
-                newAction = actions + [action]
-                priority = prevCost + cost
-                pQueue.push((nextNode, newAction, priority),priority)
-    
+            for nextNode, act, co in problem.getSuccessors(current[0]):
+                newAction = current[1] + [act]
+                priority = current[2] + co
+                pQueue.push((nextNode, newAction, priority), priority)
+    util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
@@ -171,31 +166,29 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    startingNode = problem.getStartState()
-    if problem.isGoalState(startingNode):
-        return []
-
-    visitedNodes = []
-
-    pQueue = util.PriorityQueue()
-    #((coordinate/node , action to current node , cost to current node),priority)
-    pQueue.push((startingNode, [], 0), 0)
+    start = problem.getStartState()
+    visited = []
+    pQueue = util.PriorityQueue()    
+    cost = 0
+    action = []
+        
+    pQueue.push((start, action, cost), cost)
 
     while not pQueue.isEmpty():
 
-        currentNode, actions, prevCost = pQueue.pop()
+        current = pQueue.pop()
+        
+        if problem.isGoalState(current[0]):
+            return current[1]
 
-        if currentNode not in visitedNodes:
-            visitedNodes.append(currentNode)
-
-            if problem.isGoalState(currentNode):
-                return actions
-
-            for nextNode, action, cost in problem.getSuccessors(currentNode):
-                newAction = actions + [action]
-                newCostToNode = prevCost + cost
-                heuristicCost = newCostToNode + heuristic(nextNode,problem)
-                pQueue.push((nextNode, newAction, newCostToNode),heuristicCost)
+        if current[0] not in visited:
+            visited.append(current[0])
+            
+            for nextNode, act, co in problem.getSuccessors(current[0]):
+                newAction = current[1] + [act]
+                newCost = current[2] + co
+                heuristicCost = newCost + heuristic(nextNode,problem)
+                pQueue.push((nextNode, newAction, newCost), heuristicCost)
 
     
 
